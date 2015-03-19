@@ -1,6 +1,8 @@
+#!/usr/bin/python
 """
 
 """
+import numpy
 
 from copy import deepcopy
 from numpy import *
@@ -18,8 +20,13 @@ class Matrix(object):
 		"""Inits the Matrix class with the matrix values."""
 		self.__rows = rows
 		self.__columns = columns
-		self.__matrix = []
+		self.__matrix = [[0 for x in range(columns)] for x in range(rows)]
 		self.deepcopy_matrix(matrix)
+
+	def get_matrix(self):
+		'''Returns the matrix itself.
+		'''
+		return deepcopy(self.__matrix)
 
 	def deepcopy_matrix(self, matrix):
 		"""Copy the values of given matrix in the class matrix.
@@ -35,13 +42,12 @@ class Matrix(object):
 			ValueError: Raised when dimensions mismatch.
 		"""
 
-		if not self.__rows == len(matrix) or not self.__columns == len(matrix[0]):
+		if not self.__rows == len(matrix) or ( len(matrix) and not self.__columns == len(matrix[0])):
 			raise ValueError("Error: Dimensions do not match for both the matrices!!")
 
-		for row in self.__rows:
-			self.__matrix[row] = []
-			for col in self.__columns:
-				self.__matrix[row].append(matrix[row][col])
+		for row in range(self.__rows):
+			for col in range(self.__columns):
+				self.__matrix[row][col] = matrix[row][col]
 
 	def get(self, row, column):
 		"""Return the value at the given position.
@@ -81,6 +87,16 @@ class Matrix(object):
 		"""
 		return self.__columns
 
+	def put_value(self, row, col, value):
+		"""Change the value at given row and column.
+
+		Args:
+			row: Row number of the cell to be changed.
+			col: Column number of the cell to be changed.
+			value: Value to be finally put at that position.
+		"""
+		self.__matrix[row][col] = value
+
 	def __add__(self, matrix):
 		"""Add the matrices value by value.
 
@@ -100,10 +116,10 @@ class Matrix(object):
 		if not self.__rows == matrix.get_rows() or not self.__columns == matrix.get_columns():
 			raise ValueError("Error: Dimensions do not match for both the matrices!!")
 
-		sum_matrix = Matrix(self.__matrix, self.__rows, self.__columns)
-		for row in self.__rows:
-			for col in self.__columns:
-				sum_matrix[row][col] = self.__matrix[row][col] + matrix.get(row, col)
+		sum_matrix = Matrix(deepcopy(self.__matrix), self.__rows, self.__columns)
+		for row in range(self.__rows):
+			for col in range(self.__columns):
+				sum_matrix.put_value(row, col, self.__matrix[row][col] + matrix.get(row, col))
 
 		return sum_matrix
 
@@ -126,10 +142,10 @@ class Matrix(object):
 		if not self.__rows == matrix.get_rows() or not self.__columns == matrix.get_columns():
 			raise ValueError("Error: Dimensions do not match for both the matrices!!")
 
-		diff_matrix = Matrix(self.__matrix, self.__rows, self.__columns)
-		for row in self.__rows:
-			for col in self.__columns:
-				diff_matrix[row][col] = self.__matrix[row][col] - matrix.get(row, col)
+		diff_matrix = Matrix(deepcopy(self.__matrix), self.__rows, self.__columns)
+		for row in range(self.__rows):
+			for col in range(self.__columns):
+				diff_matrix.put_value(row, col, self.__matrix[row][col] - matrix.get(row, col))
 
 		return diff_matrix
 
@@ -147,10 +163,10 @@ class Matrix(object):
 			The multiplied matrix.
 		"""	
 
-		multiplied_matrix = Matrix(self.__matrix, self.__rows, self.__columns)
-		for row in self.__rows:
-			for col in self.__columns:
-				multiplied_matrix[row][col] = self.__matrix[row][col] * value
+		multiplied_matrix = Matrix(deepcopy(self.__matrix), self.__rows, self.__columns)
+		for row in range(self.__rows):
+			for col in range(self.__columns):
+				multiplied_matrix.put_value(row, col, self.__matrix[row][col] * value)
 
 		return multiplied_matrix
 
@@ -161,10 +177,10 @@ class Matrix(object):
 			The transpose of the matrix.
 		"""
 
-		transposed_matrix = Matrix(self.__matrix, self.__rows, self.__columns)
-		for row in self.__rows:
-			for col in self.__columns:
-				transposed_matrix[row][col] = self.__matrix[col][row]
+		transposed_matrix = Matrix([[0 for x in range(self.__rows)] for x in range(self.__columns)], self.__columns, self.__rows)
+		for row in range(transposed_matrix.get_rows()):
+			for col in range(transposed_matrix.get_columns()):
+				transposed_matrix.put_value(row, col, self.__matrix[col][row])
 
 		return transposed_matrix
 
@@ -182,19 +198,18 @@ class Matrix(object):
 		Raises:
 			ValueError: Raised when dimensions mismatch.
 		"""	
-
 		if not self.__columns == matrix.get_rows():
 			raise ValueError("Error: Dimensions do not match for both the matrices!!")
 
-		multiplication_matrix = Matrix(self.__matrix, self.__rows, self.__columns)
+		multiplication_matrix = Matrix([[0 for x in range(matrix.get_columns())] for x in range(self.__rows)], self.__rows, matrix.get_columns())
 
-		for row in self.__rows:
-			for col in matrix.get_columns():
+		for row in range(self.__rows):
+			for col in range(matrix.get_columns()):
 				value = 0
-				for k in self.__columns:
-					value += self.__matrix[row][k] * matrix.get(col, k)
+				for k in range(self.__columns):
+					value += self.__matrix[row][k] * matrix.get(k, col)
 
-				multiplication_matrix[row][col] = value
+				multiplication_matrix.put_value(row, col, value)
 
 		return multiplication_matrix
 
@@ -206,9 +221,9 @@ class Matrix(object):
 		column on different lines.
 		""" 
 
-		for row in self.__rows:
+		for row in range(self.__rows):
 			row_values = ""
-			for col in self.__columns:
+			for col in range(self.__columns):
 				row_values += str(self.__matrix[row][col]) + " "
 
 			print row_values
@@ -235,11 +250,11 @@ class Matrix(object):
 			raise ValueError("The matrix is not square matrix!!")
 
 		inverted_matrix = None
-		try:
-			inv_matrix = inv(np.array(self.__matrix))
-			inverted_matrix = Matrix(inv_matrix.tolist(), self.__rows, self.__columns)
-		except:
-			raise Exception("The matrix cannot be inverted!!")
+		#try:
+		inv_matrix = numpy.linalg.inv(self.__matrix)
+		inverted_matrix = Matrix(inv_matrix.tolist(), self.__rows, self.__columns)
+		#except:
+		#	raise Exception("The matrix is singular!!")
 
 		return inverted_matrix
 
@@ -260,9 +275,9 @@ class Matrix(object):
 		sigma = [0] * self.__columns
 
 		new_matrix = deepcopy(self.__matrix)
-		new_matrix = np.array(new_matrix)
+		new_matrix = numpy.array(new_matrix)
 
-		for col in self.__columns:
+		for col in range(self.__columns):
 			mu[col] = numpy.mean(new_matrix[:, col], axis = 0)
 			sigma[col] = numpy.std(new_matrix[:, col], axis = 0)
 
@@ -270,3 +285,6 @@ class Matrix(object):
 
 		normalized_matrix = Matrix(new_matrix.tolist(), self.__rows, self.__columns)
 		return (normalized_matrix, mu, sigma)
+
+if __name__ == '__main__':
+	pass
