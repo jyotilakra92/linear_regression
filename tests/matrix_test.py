@@ -1,3 +1,14 @@
+#!/usr/bin/python
+
+"matrix_test.py - Testcases for Matrix class."
+
+__author__ = "Jyoti Lakra (jyoti.lakra92@gmail.com)"
+__copyright__ = "Copyright (C) 2015 Jyoti Lakra"
+__license__ = "GPL"
+__version__ = "1.0"
+__maintainer__ = "Jyoti Lakra"
+__date__ = "20-03-2015"
+
 import unittest
 
 import os

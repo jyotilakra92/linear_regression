@@ -1,11 +1,17 @@
 #!/usr/bin/python
-"""
 
-"""
+"matrix.py - Matrix class which performs all kinds of matrix operations."
+
+__author__ = "Jyoti Lakra (jyoti.lakra92@gmail.com)"
+__copyright__ = "Copyright (C) 2015 Jyoti Lakra"
+__license__ = "GPL"
+__version__ = "1.0"
+__maintainer__ = "Jyoti Lakra"
+__date__ = "20-03-2015"
+
 import numpy
 
 from copy import deepcopy
-from numpy import *
 
 class Matrix(object):
 	"""Represents a Matrix.
@@ -250,11 +256,11 @@ class Matrix(object):
 			raise ValueError("The matrix is not square matrix!!")
 
 		inverted_matrix = None
-		#try:
-		inv_matrix = numpy.linalg.inv(self.__matrix)
-		inverted_matrix = Matrix(inv_matrix.tolist(), self.__rows, self.__columns)
-		#except:
-		#	raise Exception("The matrix is singular!!")
+		try:
+			inv_matrix = numpy.linalg.inv(self.__matrix)
+			inverted_matrix = Matrix(inv_matrix.tolist(), self.__rows, self.__columns)
+		except:
+			raise Exception("The matrix is singular!!")
 
 		return inverted_matrix
 
